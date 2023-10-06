@@ -1,20 +1,47 @@
 import * as THREE from 'three';
-
+import { GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import init from './init';
 
 import './style.css';
 
 const { sizes, camera, scene, canvas, controls, renderer } = init();
 
-camera.position.z = 3;
+camera.position.set(0, 2, 5);
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({
-	color: 'gray',
-	wireframe: true,
-});
-const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+const floor = new THREE.Mesh(
+	new THREE.PlaneGeometry(10, 10), 
+	new THREE.MeshStandardMaterial({
+		color: '#444444', 
+		metalness: 0, 
+		roughness: 0.5
+	}))
+
+floor.receiveShadow = true;
+floor.rotation.x = -Math.PI * 0.5;
+scene.add(floor);
+
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.61);
+hemiLight.position.set(0, 50, 0);
+scene.add(hemiLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.54);
+dirLight.position.set(-8, 12, 8);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize = new THREE.Vector2(1024, 1024)
+scene.add(dirLight);
+
+const loader = new GLTFLoader();
+
+loader.load(
+	'/models/Corset/Corset.gltf',
+	(gltf) => {
+		console.log('success');
+		console.log(gltf)
+		gltf.scene.children[0].scale.set(20, 20, 20)
+		scene.add(gltf.scene.children[0])
+	}
+)
+
 
 const tick = () => {
 	controls.update();
